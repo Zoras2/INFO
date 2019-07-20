@@ -17,7 +17,7 @@ int VelocityI(int nHeight)
 {
     int i = 0;
     i --;
-    BOOST_FOREACH(int h, VELOCITY_HEIGHT)
+    BOOST_FOREACH(int64_t h, VELOCITY_HEIGHT)
     if( nHeight >= h )
       i++;
     return i;
@@ -140,31 +140,31 @@ bool Velocity(CBlockIndex* prevBlock, CBlock* block)
     }
 
     // Validate timestamp is logical based on previous block history
-        if(CURstamp < CURvalstamp || TXstampC < CURvalstamp)
+    if(CURstamp < CURvalstamp || TXstampC < CURvalstamp)
+    {
+        LogPrintf("DENIED: Block timestamp is not logical\n");
+        return false;
+    }
+    else if(OLDstamp < OLDvalstamp || TXstampO < OLDvalstamp)
+    {
+        if(nHeight > VELOCITY_HEIGHT[i])
         {
             LogPrintf("DENIED: Block timestamp is not logical\n");
             return false;
         }
-        else if(OLDstamp < OLDvalstamp || TXstampO < OLDvalstamp)
-        {
-            if(nHeight != VELOCITY_HEIGHT[i])
-            {
-                LogPrintf("DENIED: Block timestamp is not logical\n");
-                return false;
-            }
-        }
+    }
 
-        // Validate timestamp is logical based on system time
-        if(CURstamp > SYSbaseStamp || CURstamp > SYScrntstamp)
-        {
-            LogPrintf("DENIED: Block timestamp is not logical\n");
-            return false;
-        }
-        else if(TXstampC > SYSbaseStamp || TXstampC > SYScrntstamp)
-        {
-            LogPrintf("DENIED: Block timestamp is not logical\n");
-            return false;
-        }
+    // Validate timestamp is logical based on system time
+    if(CURstamp > SYSbaseStamp || CURstamp > SYScrntstamp)
+    {
+        LogPrintf("DENIED: Block timestamp is not logical\n");
+        return false;
+    }
+    else if(TXstampC > SYSbaseStamp || TXstampC > SYScrntstamp)
+    {
+        LogPrintf("DENIED: Block timestamp is not logical\n");
+        return false;
+    }
 
     // Constrain Velocity
     if(VELOCITY_EXPLICIT[i])
